@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>小龙庄园 v0.1</title>
+<link rel="stylesheet" href="style.css?v=0.1">
+</head>
+<body>
+<div id="app">
+  <header id="topbar">
+    <div class="brand">🐉 小龙庄园</div>
+    <div class="stats">
+      <span class="stat" id="coins">🪙 0</span>
+      <span class="stat lv" id="lvbox">Lv1<div id="xpbar"><i></i></div></span>
+    </div>
+    <div class="topbtns">
+      <button class="icon-btn" data-act="help" title="玩法说明">❔</button>
+      <button class="icon-btn" data-act="reset" title="重置存档">♻️</button>
+    </div>
+  </header>
+
+  <main id="farm"></main>
+
+  <footer id="invbar">
+    <div class="inv-title">仓库 <small>（点击卖出）</small></div>
+    <div id="invchips"></div>
+  </footer>
+
+  <div id="overlay" hidden></div>
+  <div id="toasts"></div>
+</div>
+<script src="game.js?v=0.1"></script>
+</body>
+</html>
