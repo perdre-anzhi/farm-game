@@ -106,15 +106,27 @@ function gainXp(n) {
   }
 }
 
-/* ---------- 地图（12×12，玩家区居中；未开垦区=草原） ---------- */
+/* ---------- 地图（12×12，玩家区居中；草原上散落雏菊/石块/蘑菇） ---------- */
 const GRID = 12;
 const TILES = buildTiles();
 function buildTiles() {
   const t = Array.from({ length: GRID }, () => Array.from({ length: GRID }, () => ({ t: 'wild', e: '' })));
   const rnd = mulberry32(20261019);
-  const deco = ['🌲', '🌳', '🪨', '🌷', '🌻', '🍄'];
   for (let r = 0; r < GRID; r++) for (let c = 0; c < GRID; c++) {
-    if (rnd() < 0.14) t[r][c].e = deco[Math.floor(rnd() * deco.length)];
+    const x = rnd();
+    if (x < 0.10) {
+      // 雏菊：随机摇曳节奏/朝向/大小/花色
+      t[r][c] = {
+        t: 'wild', daisy: {
+          dur: 2.4 + rnd() * 1.5,
+          delay: -(rnd() * 4),
+          w: 38 + rnd() * 34,
+          rot: rnd() * 22,
+          cream: rnd() < 0.35,
+        },
+      };
+    } else if (x < 0.128) t[r][c] = { t: 'wild', e: '🪨' };
+    else if (x < 0.148) t[r][c] = { t: 'wild', e: '🍄' };
   }
   t[4][3] = { t: 'coop' };
   t[5][3] = { t: 'mill' };
@@ -124,6 +136,20 @@ function buildTiles() {
   t[6][4] = { t: 'plot', i: 8, lock3: true };
   t[6][5] = { t: 'plot', i: 9, lock3: true };
   return t;
+}
+
+/* 雏菊 SVG：花茎+叶片+8 瓣白色（或奶白）花瓣+黄芯，sway 动画参数由内联样式控制 */
+function daisySvg(d) {
+  let petals = '';
+  for (let a = 0; a < 8; a++) {
+    petals += '<ellipse cx="12" cy="5.8" rx="2.7" ry="5.2" fill="' + (d.cream ? '#fff7e9' : '#ffffff') +
+      '" transform="rotate(' + (a * 45 + d.rot) + ' 12 12)"/>';
+  }
+  return '<svg class="daisy" viewBox="0 0 24 34" style="width:' + d.w + '%;animation-duration:' + d.dur +
+    's;animation-delay:' + d.delay + 's">' +
+    '<path d="M12 33 C 11.3 27 12.7 22.5 12 17" fill="none" stroke="#3f7d2f" stroke-width="2" stroke-linecap="round"/>' +
+    '<path d="M12 27 C 9.6 25.2 7.4 25.4 5.8 27.2" fill="none" stroke="#4a8a38" stroke-width="1.6" stroke-linecap="round"/>' +
+    petals + '<circle cx="12" cy="12" r="3.4" fill="#ffd23f"/></svg>';
 }
 
 /* ---------- 游戏行为 ---------- */
@@ -312,7 +338,8 @@ function renderFarm() {
   for (let r = 0; r < GRID; r++) for (let c = 0; c < GRID; c++) {
     const T = TILES[r][c];
     if (T.t === 'wild') {
-      h += '<button class="tile wild" data-act="wild"><span class="em">' + T.e + '</span></button>';
+      const inner = T.daisy ? daisySvg(T.daisy) : '<span class="em">' + T.e + '</span>';
+      h += '<button class="tile wild" data-act="wild">' + inner + '</button>';
     } else if (T.t === 'plot') {
       if (!plotUnlocked(T.i)) {
         h += '<button class="tile soil locked" data-act="wild"><span class="em">🔒</span><small>Lv3</small></button>';

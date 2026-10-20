@@ -17,12 +17,70 @@ html, body { height: 100%; }
 body {
   font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
   color: var(--ink);
-  background: linear-gradient(180deg, #bfe8a0 0%, #8cc96b 45%, #74b857 100%);
+  /* 真实草地：底色渐变 + 阳光暖斑 + 明暗草斑，纹理层见 ::before/::after */
+  background:
+    radial-gradient(1100px 560px at 78% -8%, rgba(255, 243, 196, .58), transparent 62%),
+    radial-gradient(880px 520px at 12% 108%, rgba(26, 84, 18, .32), transparent 62%),
+    radial-gradient(640px 320px at 28% 38%, rgba(255, 255, 255, .13), transparent 66%),
+    radial-gradient(560px 300px at 72% 72%, rgba(22, 78, 14, .20), transparent 66%),
+    radial-gradient(430px 230px at 15% 62%, rgba(255, 255, 255, .09), transparent 66%),
+    radial-gradient(470px 250px at 52% 18%, rgba(24, 82, 16, .13), transparent 66%),
+    radial-gradient(420px 220px at 88% 30%, rgba(255, 255, 255, .08), transparent 66%),
+    linear-gradient(180deg, #b6e291 0%, #90cb68 48%, #77b754 100%);
+  background-attachment: fixed;
   min-height: 100vh;
   user-select: none;
 }
+/* 细颗粒噪点，去掉"塑料平色"感 */
+body::before {
+  content: "";
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none;
+  opacity: .30;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+/* 稀疏草叶纹理 */
+body::after {
+  content: "";
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none;
+  opacity: .16;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cg fill='none' stroke='%235b9c3e' stroke-width='2' stroke-linecap='round' opacity='0.55'%3E%3Cpath d='M22 148 Q24 132 31 124'/%3E%3Cpath d='M58 152 Q56 136 50 128'/%3E%3Cpath d='M92 150 Q95 134 90 126'/%3E%3Cpath d='M128 152 Q126 138 133 130'/%3E%3Cpath d='M40 118 Q42 104 49 98'/%3E%3Cpath d='M76 112 Q73 100 68 94'/%3E%3Cpath d='M112 116 Q115 102 110 96'/%3E%3Cpath d='M146 120 Q144 108 150 102'/%3E%3Cpath d='M12 96 Q14 84 20 78'/%3E%3Cpath d='M60 72 Q57 62 52 58'/%3E%3Cpath d='M98 70 Q101 60 96 54'/%3E%3Cpath d='M136 76 Q134 66 140 60'/%3E%3C/g%3E%3C/svg%3E");
+}
 
-#app { display: flex; flex-direction: column; min-height: 100vh; }
+#app { display: flex; flex-direction: column; min-height: 100vh; position: relative; z-index: 1; }
+
+/* ---------- 云影（缓慢飘过，营造风感） ---------- */
+.cloud-shadow {
+  position: fixed; left: -45vw;
+  width: 38vw; height: 26vh;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(18, 60, 10, .10), rgba(18, 60, 10, 0));
+  pointer-events: none; z-index: 5;
+  animation: drift var(--dur, 90s) linear infinite;
+  animation-delay: var(--del, 0s);
+}
+@keyframes drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(190vw); }
+}
+
+/* ---------- 雏菊（SVG，随风摇曳） ---------- */
+.tile .daisy {
+  display: block; height: auto;
+  aspect-ratio: 24 / 34;
+  filter: drop-shadow(0 2px 2px rgba(30, 70, 15, .18));
+  animation-name: sway;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  transform-origin: 50% 96%;
+}
+@keyframes sway {
+  from { transform: rotate(-4.5deg); }
+  to { transform: rotate(5.5deg); }
+}
 
 /* ---------- 顶栏 ---------- */
 #topbar {
@@ -80,7 +138,7 @@ body {
 .tile:active { transform: scale(.93); }
 
 .tile.wild { background: transparent; cursor: default; }
-.tile.wild .em { opacity: .55; font-size: .8em; }
+.tile.wild .em { opacity: .55; font-size: .8em; filter: drop-shadow(0 3px 2px rgba(30, 70, 15, .28)); }
 
 .tile.soil {
   background:
